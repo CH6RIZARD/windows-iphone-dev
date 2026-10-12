@@ -82,6 +82,8 @@ xtool dev build                   # unsigned xtool/MyApp.app, no phone needed
 xtool dev                         # build, sign, install and launch on the iPhone
 ```
 
+From Windows, no typing: `scripts\install-iphone.cmd MyApp` (or double-click it for Hello).
+
 Porting an existing app: read its screens and logic, rewrite the UI in SwiftUI
 under `Sources/<Name>/`. Bundle id and name live in `xtool.yml`, packages in
 `Package.swift`. No storyboards, no .xcodeproj.
