@@ -9,7 +9,7 @@ Written for both humans and coding agents (Claude Code reads `CLAUDE.md`, Codex 
 `AGENTS.md`; both point here). If a `LOCAL.md` exists next to this file, it describes
 the specific machine and wins over anything generic below.
 
-Verified 2026-10-11 on Windows 11 25H2, WSL2 Ubuntu 26.04, Swift 6.4, xtool 1.21,
+Verified 2026-10-12 (Hello installed on iOS 26.3) on Windows 11 25H2, WSL2 Ubuntu 26.04, Swift 6.4, xtool 1.21,
 Xcode 27, Flutter 3.47.6.
 
 ## Setup from scratch
@@ -88,16 +88,24 @@ under `Sources/<Name>/`. Bundle id and name live in `xtool.yml`, packages in
 
 ## Connecting the iPhone
 
-Plug in by USB, unlock, tap **Trust**. Then in an **admin** PowerShell:
+USB passthrough (usbipd) shows the phone in Ubuntu but installs fail with
+`opTimeout` / `Mux error (-8)` ([xtool #19](https://github.com/xtool-org/xtool/issues/19)).
+What works: let Windows own the phone and forward Apple's usbmuxd port into WSL.
 
-```
-usbipd list                                  # Apple row has VID 05ac; note its BUSID
-usbipd bind --busid <BUSID>                  # once per device
-usbipd attach --wsl --busid <BUSID>          # every time it is plugged in
-```
+1. Install **Apple Devices** (Microsoft Store, or `winget install 9NP83LWLPZ9K -s msstore`),
+   open it once, plug in the phone, unlock, tap **Trust**.
+2. Once, in an **admin** PowerShell:
+   ```
+   New-NetFirewallRule -DisplayName "WSL usbmuxd 27015" -Direction Inbound -Protocol TCP -LocalPort 27015 -RemoteAddress 172.16.0.0/12 -Action Allow
+   netsh interface portproxy add v4tov4 listenport=27015 listenaddress=0.0.0.0 connectport=27015 connectaddress=127.0.0.1
+   ```
+3. In Ubuntu `~/.bashrc`:
+   ```
+   export USBMUXD_SOCKET_ADDRESS="$(ip route show default | cut -d" " -f3):27015"
+   ```
 
-Check from Ubuntu with `xtool devices` or `ideviceinfo`. On
-`AFCClient.Error.muxError`, see xtool issue #19 (comment by rena2019).
+Check with `xtool devices`. If the phone was attached with usbipd before, run
+`usbipd detach --busid <BUSID>` so Windows gets it back.
 
 First install only, on the phone:
 1. Settings > Privacy & Security > Developer Mode > On (phone restarts).

@@ -6,8 +6,8 @@ exec > >(tee -a ~/flutter-setup.log) 2>&1
 source ~/.local/share/swiftly/env.sh; export PATH="$HOME/flutter/bin:$HOME/.local/bin:$PATH"
 
 echo "== packages"
-sudo apt-get update -qq
-sudo apt-get install -y -qq llvm clang rsync file zip unzip xz-utils curl git python3 python3-venv pkg-config >/dev/null
+sudo apt-get -o DPkg::Lock::Timeout=900 update -qq
+sudo apt-get -o DPkg::Lock::Timeout=900 install -y -qq llvm clang rsync file zip unzip xz-utils curl git python3 python3-venv pkg-config >/dev/null
 
 # Ubuntu ships some LLVM tools only under /usr/lib/llvm-N/bin; expose the ones build.sh needs.
 llvmbin=$(ls -d /usr/lib/llvm-*/bin | sort -V | tail -1)
